@@ -1,0 +1,1572 @@
+<?php
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    
+    if (isset($_POST['nama_pengguna'])) {
+        $nama = htmlspecialchars($_POST['nama_pengguna']);
+        
+        echo "<script>alert('Terima kasih, " . $nama . "! Data Anda telah diproses.');</script>";
+    }
+    
+    
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Koenigsegg - Discovery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Rajdhani:wght&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000;
+            color: #fff;
+            overflow-x: hidden; 
+        }
+        
+        .rajdhani {
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .page-container {
+            transition: opacity 0.6s ease-in-out;
+            position: relative;
+            width: 100%;
+        }
+        
+        .stylized-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(3rem, 10vw, 6rem); 
+            line-height: 0.9; 
+            letter-spacing: 0.4rem; 
+            font-weight: 300; 
+            transform: scaleY(0.9);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.4); 
+            transition: opacity 1.0s ease-in-out; 
+        }
+
+        .dynamic-background-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        #carImage {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0; 
+            filter: drop-shadow(0 0 30px rgba(0, 0, 0, 0.95)); 
+            transition: opacity 1.0s ease-in-out, transform 1.2s ease-out; 
+        }
+
+        /* Navigation bar styles for the HOME view tabs */
+        .nav-item {
+            cursor: pointer;
+            padding-bottom: 0.25rem;
+            position: relative;
+            transition: color 0.5s ease;
+        }
+
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background-color: white;
+            transition: width 0.5s ease; 
+        }
+
+        .nav-item.active::after {
+            width: 100%;
+        }
+        
+        .cta-button {
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+        
+        .cta-button:hover {
+            background-color: rgba(255, 120, 0, 0.2);
+            border-color: #ff7800;
+            color: #ff7800;
+        }
+
+        .discover-button {
+            position: relative;
+            padding: 0.75rem 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 0.25rem; 
+            overflow: hidden;
+            transition: color 0.4s ease-out, border-color 0.4s ease-out;
+            z-index: 1;
+        }
+        .discover-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ff7800;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            z-index: -1;
+        }
+        .discover-button:hover {
+            color: #000;
+            border-color: #ff7800;
+        }
+        .discover-button:hover::before {
+            transform: scaleX(1);
+        }
+
+        #scrollDownCta {
+            position: absolute;
+            bottom: 4rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+        
+        #homeHistorySection {
+            background-color: #111;
+            padding: 5rem 0;
+        }
+
+        .history-card {
+            background-color: #080808; 
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 30px rgba(255, 120, 0, 0.1); 
+            border-left: 5px solid #ff7800;
+        }
+        
+        .history-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            color: #ff7800;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .history-year {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-top: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .innovation-icon {
+            width: 3rem; 
+            height: 3rem; 
+            margin-bottom: 1.5rem;
+            color: #ff7800; 
+        }
+
+        .innovation-card {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .innovation-card:hover {
+            background-color: rgba(255, 120, 0, 0.05);
+            border-color: rgba(255, 120, 0, 0.3);
+        }
+
+        .innovation-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff; 
+        }
+
+        .footer-shield-svg {
+            width: 80px;
+            height: auto;
+            fill: #888;
+            transition: fill 0.3s;
+        }
+        .footer-shield-svg:hover {
+            fill: #fff;
+        }
+        .social-icon-svg {
+            fill: #888;
+            transition: fill 0.3s;
+        }
+
+        .header-logo-svg {
+            width: 28px;
+            height: auto;
+            fill: #fff;
+        }
+
+        .header-brand-text {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem; 
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            color: #fff;
+        }
+
+        #catalogPage {
+            opacity: 0; 
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .catalog-card {
+            position: relative;
+            height: 60vh;
+            overflow: hidden; 
+            background-color: #111;
+            border-radius: 0.5rem;
+            cursor: pointer; 
+            transition: box-shadow 0.5s ease, transform 0.5s ease-out;
+        }
+        
+        .card-overlay {
+            position: absolute;
+            bottom: 0;
+            top: 0; 
+            left: 0;
+            right: 0;
+            padding: 1.5rem;
+            background: linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0.2)); 
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center content vertically */
+            align-items: center; /* Center content horizontally */
+            text-align: center; /* Center text */
+        }
+
+        .card-underline {
+            content: '';
+            width: 30px;
+            height: 1px; 
+            background-color: #ff7800;
+            margin-top: 0.5rem;
+            transition: width 0.4s ease, transform 0.4s ease;
+            transform: scaleX(0);
+        }
+
+        .catalog-card:hover .card-underline {
+            width: 100%;
+            transform: scaleX(1);
+        }
+
+        .catalog-card:hover {
+            box-shadow: 0 15px 40px rgba(255, 120, 0, 0.3); 
+            
+        }
+
+        .catalog-card img {
+            transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .catalog-card:hover img {
+            transform: scale(1.05); 
+        }
+
+        .card-name {
+            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1); 
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 300;
+            font-size: 2rem; 
+            letter-spacing: 0.4rem;
+            line-height: 0.9;
+            transform: scaleY(0.9);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+        }
+
+        .catalog-card:hover .card-name {
+            transform: scaleY(0.9) scale(1.1); 
+        }
+
+
+        .catalog-title-h2 {
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 3rem;
+            letter-spacing: 0.1rem;
+        }
+        
+        #detailPage {
+            opacity: 0; 
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .detail-hero-title {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 300; 
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            color: #fff;
+            line-height: 0.9; 
+            letter-spacing: 0.4rem; 
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.4); 
+            transform: scaleY(0.9); 
+        }
+        
+        .detail-image-block {
+            height: 100vh; 
+            background-size: cover;
+            background-position: center;
+            transition: background-image 1.0s ease-in-out;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            position: relative; 
+            overflow: hidden; 
+        }
+        
+        .detail-spec-card {
+            background-color: #1a1a1a;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border-bottom: 3px solid #ff7800;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .detail-spec-value {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1;
+            color: #ff7800;
+        }
+        
+        .detail-spec-block {
+            background-color: #111111;
+            border-left: 4px solid #ff7800;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+        }
+
+        .spec-nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+
+        .spec-nav-item:hover {
+            background-color: rgba(255, 120, 0, 0.1);
+            color: #ff7800;
+        }
+
+        .spec-nav-item.active {
+            background-color: #ff7800;
+            color: #000;
+            font-weight: 700;
+            border-color: #ff7800;
+        }
+
+        .spec-detail-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .spec-detail-table tr {
+            border-bottom: 1px solid #2d2d2d;
+        }
+
+        .spec-detail-table td {
+            padding: 1rem 0.5rem;
+        }
+
+        #specNavHighlighter {
+            position: absolute;
+            background-color: #ff7800;
+            border-radius: 0.375rem;
+            z-index: -1; 
+            transition: top 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                        left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+                        width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                        height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.19, 1, 0.22, 1), transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .header-hidden {
+            transform: translateY(-100%) scale(0.95);
+            opacity: 0;
+        }
+
+        .scroll-animate.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 1024px) {
+            .catalog-card {
+                height: 40vh; 
+            }
+            
+            .detail-spec-value {
+                font-size: 2rem;
+            }
+        }
+
+        #specStatsGrid {
+            position: relative;
+            padding: 4rem 2rem;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+        }
+        .spec-stat-card {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            text-align: center;
+            border-radius: 0.5rem;
+        }
+        .spec-stat-value {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 700;
+            line-height: 1;
+            color: #ff7800;
+            text-shadow: 0 0 15px rgba(255, 120, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background-color: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .dropdown-link {
+            font-family: 'Rajdhani', sans-serif;
+            padding: 0.5rem 1.5rem;
+            display: block;
+            transition: background-color 0.2s, color 0.2s;
+            border-radius: 0.25rem;
+            white-space: nowrap;
+        }
+
+    </style>
+</head>
+<body class="text-white min-h-screen relative">
+
+    <div id="app-container">
+
+        <div id="homePage" class="page-container">
+
+        <section id="heroViewport" class="home-section relative h-screen flex flex-col justify-between p-6 md:p-12 pb-24">
+            <div class="dynamic-background-container">
+                <img id="carImage" src="" alt="Koenigsegg Hypercar" />
+            </div>
+
+            <main class="relative z-20 flex-grow flex justify-center items-center">
+                <div class="flex flex-col items-center text-center w-full">
+                    <h1 id="mainTitle" class="stylized-title select-none whitespace-pre-line">
+                    </h1>
+                    
+                    <div class="text-lg md:text-xl font-light max-w-2xl mt-8 opacity-80 transition duration-700">
+                        <p id="mainDescription" class="mb-8" style="min-height: 84px;">
+                        </p>
+                        <button onclick="navigateTo('detail', currentCarId)" class="cta-button text-sm uppercase tracking-widest font-light z-30">
+                            <span>DISCOVER</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 ml-2">
+                                <path d="M5 12h14"></path>
+                                <path d="m12 5 7 7-7 7"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </main>
+
+        </section>
+
+        <section id="homeCarSelectorSection" class="home-section relative w-full z-20 bg-[#080808] h-screen flex flex-col justify-center items-center transition-all duration-1000">
+            <div id="selectorBgImage" class="absolute inset-0 z-0 opacity-0 transition-opacity duration-1000 bg-cover bg-center"></div>
+
+            <div class="absolute bottom-12 left-12 z-20">
+                <button onclick="navigateTo('catalog')" class="inline-flex items-center text-sm uppercase tracking-widest font-light text-gray-400 hover:text-orange-400 transition-colors duration-300">
+                    <span>EXPLORE PAST AND PRESENT MODELS</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 ml-3">
+                        <path d="M5 12h14"></path>
+                        <path d="m12 5 7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>  
+
+            <div class="w-full max-w-4xl mx-auto px-6 text-center relative z-10">
+                <h2 id="selectorInitialPrompt" class="stylized-title !text-5xl mb-12 whitespace-pre-line" style="min-height: 110px;"></h2>
+                <style>
+                    #selectorInitialPrompt, #selectorDiscoverButton {
+                        transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+                    }
+                </style>
+                
+                <button id="selectorDiscoverButton" class="discover-button inline-flex text-sm uppercase tracking-widest font-light">
+                    <span>DISCOVER MORE</span>
+                </button>
+
+                <nav class="z-30 mt-16">
+                    <div id="carNav" class="flex flex-wrap justify-center gap-x-10 gap-y-4 text-lg uppercase tracking-widest font-light">
+                    </div>
+                </nav>
+            </div>
+        </section>
+
+        <section id="homeAboutSection" class="home-section relative h-screen w-full z-20 bg-black flex items-center">
+            <div class="w-full max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div class="scroll-animate">
+                    <h2 class="history-title !text-left mb-8">THE SPIRIT OF<br>PERFORMANCE</h2>
+                    <p class="text-lg text-gray-300 leading-relaxed mb-6">
+                        Founded in 1994 by Christian von Koenigsegg, Koenigsegg Automotive AB is driven by a single, powerful belief: that perfection is a moving target. We don't just build hypercars; we challenge the limits of technology and engineering to create automotive masterpieces.
+                    </p>
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        Every component is meticulously crafted in-house at our Ängelholm facility, ensuring unparalleled quality and a cohesive design philosophy. This is the Koenigsegg way.
+                    </p>
+                </div>
+                <div class="scroll-animate">
+                    <img src="https://koenigsegg-cdn-g7eehhd6f0ewcaff.z02.azurefd.net/drupal/styles/autox720/azure/2022-02/KenoZache_IMG_9507.jpg?itok=yNJgM04R" alt="The Koenigsegg Facility" class="rounded-lg shadow-2xl">
+                </div>
+            </div>
+        </section>
+
+        <section id="homeInnovationSection" class="home-section relative h-screen w-full z-20 bg-[#080808] flex flex-col justify-center items-center text-center">
+            <div class="w-full max-w-6xl mx-auto px-6">
+                <h2 class="history-title scroll-animate">ENGINEERING INNOVATION</h2>
+                <p class="text-center text-gray-400 mb-12 max-w-3xl mx-auto scroll-animate">Beyond speed, Koenigsegg redefines automotive engineering with groundbreaking technologies that challenge convention.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
+                    <div class="innovation-card scroll-animate">
+                        <div class="innovation-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
+                        </div>
+                        <h4 class="innovation-title">Light Speed Transmission (LST)</h4>
+                        <p class="text-gray-300 mt-2">A 9-speed, multi-clutch gearbox that allows for instantaneous gear changes between any gear, eliminating sequential shifting delays. Ultimate Power on Demand.</p>
+                    </div>
+                    <div class="innovation-card scroll-animate">
+                        <div class="innovation-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" /><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15" /></svg>
+                        </div>
+                        <h4 class="innovation-title">Engage Shift System (ESS)</h4>
+                        <p class="text-gray-300 mt-2">The world's first system that combines a 6-speed gated manual with a clutch pedal and a 9-speed automatic into a single, revolutionary transmission.</p>
+                    </div>
+                    <div class="innovation-card scroll-animate">
+                        <div class="innovation-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>
+                        </div>
+                        <h4 class="innovation-title">Koenigsegg Direct Drive (KDD)</h4>
+                        <p class="text-gray-300 mt-2">A revolutionary single-gear system that replaces the traditional gearbox, providing direct power transfer from the engine to the wheels for ultimate efficiency.</p>
+                    </div>
+                    <div class="innovation-card scroll-animate">
+                        <div class="innovation-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15.91 15.91a1.5 1.5 0 01-2.12.05l-2.12-2.12a1.5 1.5 0 01-.05-2.12l2.12-2.12a1.5 1.5 0 012.12.05l2.12 2.12a1.5 1.5 0 01.05 2.12l-2.12 2.12z" /></svg>
+                        </div>
+                        <h4 class="innovation-title">Aircore Carbon Wheels</h4>
+                        <p class="text-gray-300 mt-2">Hollow, one-piece carbon fiber wheels that are incredibly strong and light, significantly reducing unsprung mass for superior handling and response.</p>
+                    </div>
+                    <div class="innovation-card scroll-animate">
+                        <div class="innovation-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" /></svg>
+                        </div>
+                        <h4 class="innovation-title">Freevalve Technology</h4>
+                        <p class="text-gray-300 mt-2">A camless engine design that uses pneumatic actuators to control valves, offering complete control over the combustion cycle for more power and efficiency.</p>
+                    </div>
+                    <div class="innovation-card scroll-animate">
+                        <div class="innovation-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5M15 15l5.25 5.25" /></svg>
+                        </div>
+                        <h4 class="innovation-title">Triplex Suspension</h4>
+                        <p class="text-gray-300 mt-2">A unique third, horizontal damper connecting the rear wheels that counteracts the car's tendency to squat during acceleration, keeping it perfectly level.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer id="mainFooter" class="home-section relative h-screen w-full z-20 bg-black flex flex-col justify-center items-center text-center">
+            <div class="w-full max-w-6xl mx-auto px-6 scroll-animate">
+                <div class="mb-12 flex justify-center">
+                    <svg class="footer-shield-svg" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg"><path d="M50 0L0 20V60L50 120L100 60V20L50 0ZM50 100L20 50V30L50 10L80 30V50L50 100Z"/></svg>
+                </div>
+
+                <div class="flex justify-center gap-6 mb-12">
+                    <a class="hover:opacity-75 cursor-pointer"><svg class="social-icon-svg w-6 h-6" viewBox="0 0 24 24"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg></a>
+                    <a class="hover:opacity-75 cursor-pointer"><svg class="social-icon-svg w-6 h-6" viewBox="0 0 24 24"><path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25 1.09-.83 1.82-1.88 2.08-.47.13-1.32.2-2.69.22-1.37.02-2.94.03-4.7.03s-3.33 0-4.7-.03c-1.37-.02-2.22-.09-2.69-.22-.99-.24-1.59-.9-1.82-2.02-.28-1.03-.44-2.64-.44-4.83l.01-.12c0-.6.03-1.29.1-2.09.06-.8.15-1.43.28-1.9.28-1.01.88-1.62 1.82-1.85.47-.13 1.32-.2 2.69-.22 1.37-.02 2.94-.03 4.7-.03s3.33 0 4.7.03c1.37.02 2.22.09 2.69.22.99.24 1.59.9 1.82 1.85z"/></svg></a>
+                    <a class="hover:opacity-75 cursor-pointer"><svg class="social-icon-svg w-6 h-6" viewBox="0 0 24 24"><path d="M18 3a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3h12m0 2H6a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h6V13H9.5v-2H12V9.5A2.5 2.5 0 0 1 14.5 7H16v2h-1.5a.5.5 0 0 0-.5.5V11H16l-.5 2h-2.5v6H18a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/></svg></a>
+                    <a class="hover:opacity-75 cursor-pointer"><svg class="social-icon-svg w-6 h-6" viewBox="0 0 24 24"><path d="M14.258 21.755a1.003 1.003 0 0 1-.755-.342L9.5 15.5H4.75A2.753 2.753 0 0 1 2 12.75V4.75A2.753 2.753 0 0 1 4.75 2h14.5A2.753 2.753 0 0 1 22 4.75v8a2.753 2.753 0 0 1-2.75 2.75h-4.086l-4.197 5.875a1 1 0 0 1-.709.38zm-4.508-7.255L13.5 19.5l3.5-5h2.25a1.25 1.25 0 0 0 1.25-1.25V4.75a1.25 1.25 0 0 0-1.25-1.25H4.75a1.25 1.25 0 0 0-1.25 1.25v8a1.25 1.25 0 0 0 1.25 1.25h5z"/></svg></a>
+                    <a class="hover:opacity-75 cursor-pointer"><svg class="social-icon-svg w-6 h-6" viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-3.06v9.36h3.06v-4.57c0-1.22.22-2.4 1.72-2.4s1.5 1.41 1.5 2.47v4.5h3.06M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m-1.39 2.04h2.79v9.36H5.49v-9.36z"/></svg></a>
+                </div>
+
+                <nav class="flex flex-wrap justify-center gap-x-8 gap-y-2 mb-12 text-sm uppercase tracking-widest font-light">
+                    <a class="hover:text-orange-400 transition-colors cursor-pointer">Models</a>
+                    <a class="hover:text-orange-400 transition-colors cursor-pointer">Pre-owned</a>
+                    <a class="hover:text-orange-400 transition-colors cursor-pointer">Brand</a>
+                    <a class="hover:text-orange-400 transition-colors cursor-pointer">Career</a>
+                    <a class="hover:text-orange-400 transition-colors cursor-pointer">Media</a>
+                    <a class="hover:text-orange-400 transition-colors cursor-pointer">Contact</a>
+                </nav>
+
+                <div class="text-xs text-gray-500">
+                    <p class="mb-2">&copy; 2024 Koenigsegg Automotive AB. All Rights Reserved.</p>
+                    <div class="flex justify-center gap-4">
+                        <a class="hover:text-white transition-colors cursor-pointer">Legal Notice</a>
+                        <span>|</span>
+                        <a class="hover:text-white transition-colors cursor-pointer">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        </div>
+
+        <div id="catalogPage" class="page-container">
+            <main class="w-full max-w-7xl mx-auto px-6 py-24">
+                <h2 class="stylized-title text-center mb-16 scroll-animate">CURRENT MODELS</h2>
+                <div id="catalogCurrentGrid" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
+
+                <h2 class="stylized-title text-center mt-24 mb-16 scroll-animate">LEGACY MODELS</h2>
+                <div id="catalogLegacyGrid" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
+            </main>
+            <div class="h-24"></div>
+        </div>
+
+
+        <div id="detailPage" class="page-container">
+            
+            <main id="detailMainContent">
+                <div id="detailImageBlock" class="detail-image-block scroll-animate">
+                    <h1 id="detailCarName" class="detail-hero-title"></h1>
+                </div>
+
+                <div class="px-6 md:px-12">
+                    <div id="detailFeaturesContainer" class="w-full max-w-6xl mx-auto mt-16">
+                    </div>
+
+                    <div id="detailSpecsSection" class="w-full max-w-6xl mx-auto mt-24 pt-12 border-t border-gray-800">
+                        <div class="grid grid-cols-1 gap-12">
+                            <div class="scroll-animate">
+                                <h2 id="specTitle" class="text-3xl font-bold mb-12 text-orange-400 rajdhani">TECHNICAL SPECIFICATIONS</h2>
+                                <div id="specStatsGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <section id="detailGallerySection" class="w-full max-w-6xl mx-auto mt-24 pt-12 border-t border-gray-800 hidden">
+                        <h2 class="text-3xl font-bold mb-8 text-orange-400 rajdhani scroll-animate">PERSPECTIVES</h2>
+                        <div id="detailGalleryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        </div>
+                    </section>
+                <div class="h-48"></div>
+                </div>
+            </main>
+        </div>
+
+        <div id="legacyPage" class="page-container">
+            <main class="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 px-6 py-12">
+                <div id="legacyNav" class="lg:col-span-1 flex flex-col gap-2 self-start"></div>
+                <div id="legacyContent" class="lg:col-span-2">
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <header class="page-header absolute top-8 left-0 w-full z-50 transition-all duration-500 origin-top">
+        <div class="max-w-screen-2xl mx-auto flex justify-between items-center px-6 md:px-12">
+            <div class="flex items-center gap-4 opacity-90 cursor-pointer" onclick="navigateTo('home')">
+                <svg class="header-logo-svg" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg"><path d="M50 0L0 20V60L50 120L100 60V20L50 0ZM50 100L20 50V30L50 10L80 30V50L50 100Z"/></svg>
+                <span class="header-brand-text">KOENIGSEGG</span>
+            </div>
+
+            <div class="relative group">
+                <button class="p-2 focus:outline-none">
+                    <div class="w-6 h-0.5 bg-white transition duration-300 group-hover:w-8"></div>
+                    <div class="w-6 h-0.5 bg-white mt-1.5 transition duration-300 group-hover:w-4"></div>
+                </button>
+                <div class="dropdown-menu group-hover:opacity-100 group-hover:transform-translate-y-0 group-hover:pointer-events-auto">
+                    <a href="#" onclick="navigateTo('home-selector')" class="dropdown-link hover:bg-orange-500/20 hover:text-orange-400">Home</a>
+                    <a href="#" onclick="navigateTo('catalog')" class="dropdown-link hover:bg-orange-500/20 hover:text-orange-400">Models</a>
+                    <a href="#" class="dropdown-link text-gray-500 cursor-not-allowed">Brand</a>
+                    <a href="#" class="dropdown-link text-gray-500 cursor-not-allowed">Career</a>
+                    <a href="#" class="dropdown-link text-gray-500 cursor-not-allowed">Contact</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <script>
+        const carData = [
+            {
+                id: 'sadaira',
+                name: 'Sadaira Speer',
+                title: 'WORLD RECORD\nHYPERCAR',
+                subtitle: 'The ultimate speed machine.',
+                description: 'The manifestation of limitless speed. Equipped with the revolutionary Ghost Aero system and over 1800 hp, the Speer is designed to surpass all speed records.',
+                image: 'https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2026-Koenigsegg-Sadairs-Spear-008-1080.jpg',
+                spotlightColor: '#ff7800', 
+                specs: [{
+                    categoryTitle: "Performance",
+                    keySpecs: [
+                        { prefix: ">", value: "500", unit: "km/h", label: "Top Speed (Target)" },
+                        { value: "1800+", unit: "hp", label: "on E85" },
+                        { value: "2.3", unit: "s", label: "0-100 km/h" },
+                        { prefix: "<", value: "28", unit: "s", label: "0-400-0 km/h" }
+                    ],
+                    categoryImage: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2026-Koenigsegg-Sadairs-Spear-001-1080.jpg",
+                    details: [
+                        { label: "Power Output", value: "1800+ hp on E85", description: "On E85 fuel, this engine can unleash over 1800 horsepower, placing it among the most powerful production car engines ever made." },
+                        { label: "Top Speed", value: "500+ km/h (Target)", description: "Theoretically, the combination of incredible power and advanced aerodynamics allows the Sadaira Speer to reach speeds above 500 km/h." },
+                        { label: "0-100 km/h", value: "2.3 s", description: "Aided by an advanced all-wheel drive (AWD) system and the LST, the Sadaira Speer rockets from 0 to 100 km/h in just 2.3 seconds." },
+                        { label: "0-400-0 km/h", value: "< 28s (Target)", description: "The performance target for accelerating from 0 to 400 km/h and back to 0 is under 28 seconds, a testament to its superior braking and acceleration." },
+                    ]
+                }, {
+                    categoryTitle: "Engine", 
+                    categoryImage: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2020-Koenigsegg-Jesko-Absolut-020-1080.jpg",
+                    details: [
+                        { label: "Type", value: "Koenigsegg 5.0L V8 Twin-Turbo", description: "An in-house developed 5.0-liter V8 engine, equipped with two precision turbochargers to produce massive power across the entire rev range." },
+                        { label: "Compression", value: "9.5:1", description: "An optimized compression ratio for high performance, whether using regular gasoline or E85 bio-ethanol fuel." },
+                        { label: "Fuel", value: "Gasoline, E85", description: "A flexible engine management system allows the use of various fuel types, with maximum power output achieved using E85." },
+                        { label: "Weight", value: "185 kg", description: "Lightweight aluminum engine block construction and reinforced internal components result in an engine that is both extremely light and strong." },
+                    ]
+                }, {
+                    categoryTitle: "Transmission", 
+                    categoryImage: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2023-Koenigsegg-CC850-015-1080.jpg",
+                    details: [
+                        { label: "Type", value: "Koenigsegg 9-speed LST", description: "The Light Speed Transmission (LST) is a Koenigsegg innovation. This 9-speed, 7-clutch transmission allows for nearly instantaneous gear changes." },
+                        { label: "Drivetrain", value: "All-Wheel Drive (AWD)", description: "An intelligent all-wheel-drive system with torque vectoring ensures maximum traction and stability in all conditions." },
+                        { label: "Clutches", value: "7-clutch system", description: "Seven wet clutches enable extremely fast and smooth shifts between any gear, without having to go through intermediate gears." },
+                    ]
+                }, {
+                    categoryTitle: "Technology",
+                    details: [
+                        { label: "Light Speed Transmission (LST)", value: "9-Speed", description: "This lightweight, multi-clutch 9-speed transmission offers the fastest gear shifts ever, giving the driver full control and instant response.", image: "https://placehold.co/800x500/1E3A8A/ffffff?text=LST+Diagram" },
+                        { label: "Advanced Aerodynamics", value: "Active System", description: "An advanced aero package with active elements to generate downforce or reduce drag depending on the need, providing optimal performance in all conditions." },
+                    ]
+                }],
+                features: [
+                    {
+                        title: "Ghost Aero System",
+                        description: "A revolutionary active aerodynamics system, using flaps and wings hidden within the car's body. This system can dramatically alter the car's aerodynamic profile for maximum downforce in corners or minimal drag on straights, without sacrificing clean aesthetics.",
+                        image: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2026-Koenigsegg-Sadairs-Spear-005-1080.jpg"
+                    },
+                    {
+                        title: "1800+ Horsepower V8",
+                        description: "Powered by an extensively upgraded 5.0-liter twin-turbo V8 engine, the Sadaira Speer produces over 1800 horsepower on E85 fuel. This raw power is the core of its ability to break speed records.",
+                        image: "https://koenigsegg-cdn-g7eehhd6f0ewcaff.z02.azurefd.net/drupal/styles/1400x1000/azure/2025-06/IMG_0561_2.png?h=d1cb525d&itok=AH8zDQiW"
+                    }
+                ],
+                gallery: [
+                    'https://koenigsegg-cdn-g7eehhd6f0ewcaff.z02.azurefd.net/drupal/styles/1400x1000/azure/2025-06/KG14-PRESS-12_0.jpg?h=89f35b84&itok=fnstEzVL', // Exterior
+                    'https://static0.carbuzzimages.com/wordpress/wp-content/uploads/2025/07/k90a6289c.jpg?q=49&fit=contain&w=750&h=422&dpr=2', // Engine
+                    'https://koenigsegg-cdn-g7eehhd6f0ewcaff.z02.azurefd.net/drupal/styles/autox720/azure/2025-06/KG14-PRESS-13_0.jpg?itok=T3ROQd-N'      // Interior Concept
+                ],
+                type: 'current',
+                showInCatalog: false, 
+                longDescription: 'The Sadaira Speer was designed from the ground up to be the fastest on the planet. Every curve of its carbon-fiber monocoque body is calculated to produce optimal downforce while minimizing wind resistance (drag). The car is powered by a revolutionary 5.0-liter twin-turbo V8 engine, capable of producing over 1800 horsepower. This incredible power is paired with Koenigsegg\'s 9-speed Light Speed Transmission (LST), ensuring instant power transfer and nearly imperceptible gear changes. The Speer is the pinnacle of automotive engineering.',
+            },
+            {
+                id: 'gemera',
+                name: 'Gemera',
+                title: 'WORLDS FIRST\nMEGA GT FOR FOUR',
+                subtitle: 'Four-seat luxury with mega power.',
+                description: 'The world\'s first Mega-GT for four. Combining luxury with 1700 hp performance from the \'Tiny Friendly Giant\' engine and three electric motors.',
+                image: 'https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2021-Koenigsegg-Gemera-011-1080.jpg',
+                spotlightColor: '#e0c85c', 
+                specs: [{
+                    categoryTitle: "Performance",       
+                    keySpecs: [
+                        { value: "1700", unit: "hp", label: "Combined Power" },
+                        { value: "1.9", unit: "s", label: "0-100 km/h" },
+                        { value: "400", unit: "km/h", label: "Top Speed" },
+                        { value: "4", unit: "Seats", label: "Mega-GT" }
+                    ],
+                    categoryImage: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2021-Koenigsegg-Gemera-001-1080.jpg",
+                    details: [
+                        { label: "Combined Power", value: "1700 hp / 1.27 MW", description: "The total output from the TFG engine and three electric motors reaches 1700 horsepower, delivering true megacar performance." },
+                        { label: "Combined Torque", value: "3500 Nm", description: "Incredible combined torque provides thrilling, instant acceleration from a standstill." },
+                        { label: "0-100 km/h", value: "1.9 s", description: "Thanks to instant torque from the electric motors and the AWD system, the Gemera can reach 100 km/h in just 1.9 seconds." },
+                        { label: "Top Speed", value: "400 km/h", description: "As a Mega-GT, the Gemera is capable of a 400 km/h top speed, combining speed with comfort." },
+                    ]
+                }, {
+                    categoryTitle: "Powertrain",
+                    categoryImage: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2021-Koenigsegg-Gemera-018-1080.jpg",
+                    details: [
+                        { label: "Engine", value: "2.0L 3-cylinder 'TFG'", description: "The 'Tiny Friendly Giant' engine is the world's most powerful 3-cylinder engine, producing 600 hp." },
+                        { label: "E-Motors", value: "3 electric motors", description: "Three electric motors—one for each rear wheel and one on the crankshaft—provide a total of 1100 hp of electric power." },
+                        { label: "Drivetrain", value: "AWD & All-wheel steering", description: "All-wheel drive and steering provide unparalleled agility and stability for a car of its size." },
+                    ]
+                }, {
+                    categoryTitle: "Dimensions",
+                    details: [
+                        { label: "Seating", value: "4 adults", description: "Designed to comfortably accommodate four adults, complete with heated and cooled cup holders.", categoryImage: "https://placehold.co/1200x800/4B5563/ffffff?text=INTERIOR" },
+                        { label: "Luggage Space", value: "200 litres", description: "A total of 200 liters of luggage space (front and rear) is enough to carry luggage for four people." },
+                        { label: "Wheelbase", value: "3000 mm", description: "The long wheelbase provides a spacious cabin and superior stability at high speeds." },
+                        { label: "Total Length", value: "4975 mm", description: "Its large dimensions highlight its status as a Grand Tourer, yet with a design that remains aerodynamic." },
+                    ]
+                }, {
+                    categoryTitle: "Technology",
+                    details: [
+                        { label: "Tiny Friendly Giant (TFG)", value: "600 hp", description: "A 2.0L 3-cylinder engine capable of producing 600hp, making it the world's most power-dense production engine per liter. Freevalve technology allows this engine to operate without a camshaft, providing incredible efficiency and fuel flexibility.", categoryImage: "https://placehold.co/1200x800/4B5563/ffffff?text=TFG+ENGINE" },
+                        { label: "Koenigsegg Direct Drive", value: "Single-Gear", description: "A KDD variant adapted for the Gemera, eliminating the traditional gearbox for highly efficient and seamless power transfer to the wheels." },
+                        { label: "Mega-GT Concept", value: "4-Seater", description: "The world's first car to combine hypercar performance with the practicality and comfort of a 4-seater Grand Tourer." },
+                    ]
+                }],
+                features: [
+                    {
+                        title: "The First Mega-GT",
+                        description: "Gemera, which means 'to give more' in Swedish, is the world's first Mega GT with four seats. This car combines comfort, practicality, and extraordinary performance, allowing the hypercar experience to be enjoyed with family or friends.",
+                        image: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2021-Koenigsegg-Gemera-015-1080.jpg"
+                    },
+                    {
+                        title: "Hybrid Powertrain",
+                        description: "Its revolutionary part lies in the Koenigsegg hybrid powertrain. The 2.0-liter 3-cylinder Twin-Turbo engine, called the 'Tiny Friendly Giant' (TFG), works with three electric motors to produce a total output of 1700 hp, providing instant acceleration and amazing efficiency.",
+                        image: "https://koenigsegg-cdn-g7eehhd6f0ewcaff.z02.azurefd.net/drupal/styles/1920x1400/azure/2023-07/Screenshot%202023-07-10%20at%2013.38.01.png?h=018cfb4b&itok=Cf7ikFiF"
+                    }
+                ],
+                gallery: [
+                    'https://dealerimages.dealereprocess.com/image/upload/2492637', // Exterior
+                    'https://www.supercars.net/blog/wp-content/uploads/2023/03/9-Koenigsegg-Gemera-Interior.jpg', // Interior
+                    'https://www.topgear.com/sites/default/files/2022/04/koenigsegggemera.jpg'  // Engine
+                ],
+                type: 'current',
+                longDescription: 'Gemera, which means "to give more" in Swedish, is the world\'s first Mega GT with four seats. This car combines comfort, practicality, and extraordinary performance. Its revolutionary part lies in the Koenigsegg hybrid powertrain. The 2.0-liter 3-cylinder Twin-Turbo engine, called the "Tiny Friendly Giant" (TFG), works with three electric motors to produce a total output of 1700 hp. With a long wheelbase, the Gemera offers a luxurious cabin space, making it the ideal hypercar for long-distance journeys with family.',
+            },
+            {
+                id: 'jesko-attack',
+                name: 'Jesko Attack',
+                title: 'ROAD LEGAL\nTRACK LEGEND',
+                subtitle: 'Downforce and precision on demand.',
+                description: 'A road-legal track legend. Generates massive downforce and is equipped with the Light Speed Transmission (LST) for unparalleled precision and cornering speed.',
+                image: 'https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2020-Koenigsegg-Jesko-012-1080.jpg', 
+                spotlightColor: '#4c99e0', 
+                specs: [{
+                    categoryTitle: "Engine",
+                    keySpecs: [
+                        { value: "1600", unit: "bhp", label: "on E85" },
+                        { value: "1400", unit: "kg", label: "Max Downforce" },
+                        { value: "8500", unit: "rpm", label: "Max RPM" },
+                        { value: "9", unit: "Speed", label: "LST" }
+                    ],
+                    categoryImage: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2020-Koenigsegg-Jesko-008-1080.jpg",
+                    details: [
+                        { label: "Type", value: "Koenigsegg 5.0 litre twin-turbo V8", description: "The heart of the Jesko is a redesigned 5.0-liter V8 engine with a 180-degree flat-plane crankshaft." },
+                        { label: "Construction", value: "Carbon fiber intake manifold", description: "The use of carbon fiber in the intake manifold and other components reduces weight and improves airflow efficiency." },
+                        { label: "Power (E85)", value: "1600 bhp at 7800 rpm", description: "On E85 fuel, this engine produces a massive 1600 bhp, pushing the limits of hypercar performance." },
+                        { label: "Power (Gasoline)", value: "1280 bhp at 7800 rpm", description: "Even with standard gasoline, the Jesko still produces a very impressive 1280 bhp." },
+                        { label: "Torque", value: "1500 Nm at 5100 rpm", description: "A peak torque of 1500 Nm provides incredible mid-range acceleration." },
+                        { label: "Max RPM", value: "8500 rpm", description: "The new crankshaft allows the engine to rev up to 8500 RPM, producing a thunderous sound and a wide powerband." },
+                    ]
+                }, {
+                    categoryTitle: "Transmission",
+                    categoryImage: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2020-Koenigsegg-Jesko-015-1080.jpg",
+                    details: [
+                        { label: "Type", value: "Koenigsegg 9-speed LST", description: "The Light Speed Transmission (LST) is a revolutionary multi-clutch transmission designed and built by Koenigsegg." },
+                        { label: "Gears", value: "9 forward, 1 reverse", description: "Nine gears ensure the right ratio is always available for maximum acceleration and efficiency." },
+                        { label: "Shift Modes", value: "Automatic and manual", description: "The driver can choose automatic mode or take full control via the paddle shifters or gear lever." },
+                        { label: "Clutches", value: "7 wet multi-disc clutches", description: "Seven clutches allow for nearly instantaneous shifts between any gear, without having to go through intermediate gears (UPOD - Ultimate Power On Demand)." },
+                    ]
+                }, {
+                    categoryTitle: "Aerodynamics",
+                    categoryImage: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2020-Koenigsegg-Jesko-004-1080.jpg",
+                    details: [
+                        { label: "Front Splitter", value: "Active underside flaps", description: "Active flaps under the front splitter adjust to balance downforce and drag." },
+                        { label: "Rear Wing", value: "Active top-mounted", description: "The large, curved active rear wing is the centerpiece of the Jesko Attack's aerodynamic package." },
+                        { label: "Downforce at 250 km/h", value: "800 kg", description: "At 250 km/h, the Jesko Attack already generates 800 kg of downforce." },
+                        { label: "Downforce at 275 km/h", value: "1000 kg", description: "Increasing to 1000 kg at 275 km/h, providing incredible grip in high-speed corners." },
+                        { label: "Maximum Downforce", value: "1400 kg", description: "At its top speed, downforce can reach 1400 kg, which is more than the car's own weight." },
+                    ]
+                }, {
+                    categoryTitle: "Technology",
+                    details: [
+                        { label: "Light Speed Transmission (LST)", value: "9-Speed", description: "This lightweight, multi-clutch 9-speed transmission offers the fastest gear shifts ever, giving the driver full control and instant response.", image: "https://placehold.co/800x500/1E3A8A/ffffff?text=LST+Diagram" },
+                        { label: "Active Aerodynamics", value: "Dynamic Control", description: "Dynamically controlled rear wing and front flaps to optimize downforce in corners and reduce drag on straights." },
+                    ]
+                }],
+                gallery: [
+                    'https://www.thesupercarblog.com/wp-content/uploads/2023/12/Koenigsegg-Jesko-Odin-delivery-3.jpg', // Exterior
+                    'https://www.topgear.com/sites/default/files/2024/12/TG_DSC2501%20copy.jpg', // Interior
+                    'https://www.cnet.com/a/img/resize/a6e5dbf0a63c668c048434466562344a2239a5a3/hub/2019/03/06/9821d3ff-7f87-4744-b5d0-29b89ee7dee3/koenigsegg-jesko-geneva-2019.jpg?auto=webp&width=1200'  // Engine
+                ],
+                features: [
+                    {
+                        title: "Ultimate Downforce",
+                        description: "The Jesko Attack is a pure, road-legal racing machine. Its main focus is downforce, reaching an incredible 1400 kg at 275 km/h. The large top-mounted rear wing and aggressive front splitter work together to press the car onto the track, maximizing cornering grip.",
+                        image: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2020-Koenigsegg-Jesko-004-1080.jpg"
+                    },
+                    {
+                        title: "Light Speed Transmission",
+                        description: "This 9-speed, 7-clutch transmission allows for nearly instantaneous shifts between any gear, without having to go through intermediate gears. UPOD (Ultimate Power On Demand) technology ensures you are always in the right gear for maximum acceleration.",
+                        image: "https://koenigsegg-cdn-g7eehhd6f0ewcaff.z02.azurefd.net/drupal/styles/autox720/azure/2022-01/IMG_0561_2.png?itok=Ki7v9cGM"
+                    }
+                ],
+                type: 'current',
+                longDescription: 'The Jesko Attack is a pure, road-legal racing machine. Its main focus is downforce, reaching an incredible 1400 kg at 275 km/h. The large top-mounted rear wing and aggressive front splitter work together to press the car onto the track, maximizing cornering grip. This car represents Koenigsegg\'s philosophy of creating responsive, agile, and incredibly fast cars on the track.',
+            },
+            {
+                id: 'jesko-absolut',
+                name: 'Jesko Absolut',
+                title: 'FASTEST\nEVER MADE',
+                subtitle: 'Engineered for top speed.',
+                description: 'The pursuit of top speed. With a drag coefficient of only 0.278 Cd, every detail is shaped to be the fastest car Koenigsegg has ever made.',
+                image: 'https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2021-Koenigsegg-Jesko-Absolut-011-1080.jpg',
+                spotlightColor: '#e5e7eb', 
+                specs: [{
+                    categoryTitle: "Performance",
+                    keySpecs: [
+                        { prefix: ">", value: "532", unit: "km/h", label: "Top Speed" },
+                        { value: "1600", unit: "bhp", label: "on E85" },
+                        { value: "0.278", unit: "Cd", label: "Drag Coefficient" },
+                        { value: "9", unit: "Speed", label: "LST" }
+                    ],
+                    categoryImage: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2021-Koenigsegg-Jesko-Absolut-001-1080.jpg",
+                    details: [
+                        { label: "Top Speed", value: "532+ km/h (Theoretical)", description: "Simulations show the Jesko Absolut is capable of exceeding 330 mph (532 km/h), making it the fastest Koenigsegg ever." },
+                        { label: "Power (E85)", value: "1600 bhp", description: "The same 1600 bhp as the Attack variant, but optimized to achieve the highest top speed." },
+                    ]
+                }, {
+                    categoryTitle: "Aerodynamics",
+                    categoryImage: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2021-Koenigsegg-Jesko-Absolut-004-1080.jpg",
+                    details: [
+                        { label: "Drag Coefficient", value: "0.278 Cd", description: "An extremely low drag coefficient is the key to achieving phenomenal top speeds." },
+                        { label: "Frontal Area", value: "1.88 m²", description: "Every surface is optimized to minimize frontal area and reduce air resistance." },
+                        { label: "Rear Design", value: "Extended with dual fins", description: "The rear wing is replaced by two fighter jet-inspired fins to stabilize the car at very high speeds." },
+                        { label: "Wheels", value: "Covered rear wheels", description: "Removable rear wheel covers reduce air turbulence around the wheels." },
+                    ]
+                }, {
+                    categoryTitle: "Engine",
+                    categoryImage: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2021-Koenigsegg-Jesko-Absolut-008-1080.jpg",
+                    details: [
+                        { label: "Type", value: "Koenigsegg 5.0 litre twin-turbo V8", description: "The same powerful V8 engine as the Jesko Attack, providing the power needed to break speed records." },
+                        { label: "Max RPM", value: "8500 rpm", description: "The ability to rev up to 8500 RPM ensures power is available across the entire speed range." },
+                        { label: "Torque", value: "1500 Nm at 5100 rpm", description: "Massive torque ensures strong acceleration even at high speeds." },
+                    ]
+                }, {
+                    categoryTitle: "Technology",
+                    details: [
+                        { label: "Low-Drag Aerodynamics", value: "0.278 Cd", description: "Every body panel is redesigned to achieve the lowest possible drag coefficient (0.278 Cd), the key to reaching absolute top speed." },
+                        { label: "Light Speed Transmission (LST)", value: "9-Speed", description: "This lightweight, multi-clutch 9-speed transmission offers the fastest gear shifts ever, giving the driver full control and instant response." },
+                    ]
+                }],
+                features: [
+                    {
+                        title: "Engineered for Speed",
+                        description: "The Jesko Absolut is the high-speed variant of the Jesko. Designed with a sleek 'long-tail' shape and integrated rear fins, the Absolut achieves an extremely low drag coefficient of just 0.278 Cd.",
+                        image: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2021-Koenigsegg-Jesko-Absolut-004-1080.jpg"
+                    },
+                    {
+                        title: "The Pursuit of 500+ km/h",
+                        description: "The main goal of this model is to surpass the 500 km/h barrier, supported by a 1600 hp 5.0-liter twin-turbo V8 engine and a 9-speed LST that ensures smooth power delivery at top speed. This is an uncompromising pursuit of speed.",
+                        image: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2021-Koenigsegg-Jesko-Absolut-001-1080.jpg"
+                    }
+                ],
+                gallery: [
+                    'https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2021-Koenigsegg-Jesko-Absolut-009-1080.jpg', // Exterior
+                    'https://www.lus.so/wp-content/uploads/2025/03/Koenigsegg-Jesko-Absolut-Luxury-car-broker-LUSSO-9.jpg', // Interior
+                    'https://i.ytimg.com/vi/aNbeF8Ed9fM/hq720.jpg?sqp=-oaymwE7CK4FEIIDSFryq4qpAy0IARUAAAAAGAElAADIQj0AgKJD8AEB-AH-CYACygWKAgwIABABGFYgXyhlMA8=&rs=AOn4CLAkbHUXKj0uE9VDFZvaqByFlSRb_Q'  // Engine
+                ],
+                type: 'current',
+                longDescription: 'The Jesko Absolut is the high-speed variant of the Jesko. Designed with a sleek "long-tail" shape and integrated rear fins, the Absolut achieves an extremely low drag coefficient of just 0.278 Cd. The main goal of this model is to surpass the 500 km/h barrier, supported by the same 1600 hp 5.0-liter twin-turbo V8 engine with a 9-speed LST that ensures smooth power delivery at high speed.',
+            },
+            {
+                id: 'cc850',
+                name: 'CC850',
+                title: '50TH ANNIVERSARY\nLIMITED EDITION',
+                subtitle: 'A tribute to the iconic CC8S.',
+                description: 'A celebration of nostalgia and innovation. Its iconic feature is the Engage Shift System (ESS), the world\'s first manual and automatic transmission in one package.',
+                image: 'https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2023-Koenigsegg-CC850-003-1080.jpg',
+                spotlightColor: '#34d399', 
+                specs: [{
+                    categoryTitle: "Transmission",
+                    keySpecs: [
+                        { value: "1385", unit: "hp", label: "on E85" },
+                        { value: "1:1", unit: "", label: "Power-to-weight" },
+                        { value: "6", unit: "Speed", label: "Manual Mode" },
+                        { value: "9", unit: "Speed", label: "Auto Mode" }
+                    ],
+                    categoryImage: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2023-Koenigsegg-CC850-015-1080.jpg",
+                    details: [
+                        { label: "Type", value: "Engage Shift System (ESS)", description: "The most revolutionary feature is the ESS, a transmission that can function as either a manual or an automatic." },
+                        { label: "Manual Mode", value: "6-speed gated manual", description: "Provides a pure, analog driving experience with a gated shifter and a true clutch pedal." },
+                        { label: "Automatic Mode", value: "9-speed automatic", description: "In automatic mode, the ESS functions as an incredibly fast and smooth 9-speed transmission, similar to the LST." },
+                    ]
+                }, {
+                    categoryTitle: "Performance",
+                    categoryImage: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2023-Koenigsegg-CC850-001-1080.jpg",
+                    details: [
+                        { label: "Power (E85)", value: "1385 hp", description: "Massive power ensures thrilling performance, true to the Koenigsegg legacy." },
+                        { label: "Curb Weight", value: "1385 kg", description: "An extremely light weight is achieved through the use of advanced materials like carbon fiber." },
+                        { label: "Power-to-Weight", value: "1:1", description: "The CC850 achieves a perfect power-to-weight ratio, providing incredible agility and responsiveness." },
+                        { label: "Torque", value: "1385 Nm", description: "Torque that matches its power and weight, providing a perfect performance balance." },
+                    ]
+                }, {
+                    categoryTitle: "Technology",
+                    details: [
+                        { label: "Engage Shift System (ESS)", value: "Manual/Auto", description: "A revolutionary transmission system that can function as a 6-speed manual with a true clutch, or as a smooth 9-speed automatic.", image: "https://placehold.co/800x500/064E3B/ffffff?text=ESS+Gated+Shifter" },
+                        { label: "1:1 Power-to-Weight Ratio", value: "1385hp/1385kg", description: "Achieving a perfect ratio of 1385 hp to 1385 kg, delivering an incredibly pure and responsive driving experience." },
+                    ]
+                }],
+                features: [
+                    {
+                        title: "Engage Shift System (ESS)",
+                        description: "Created to celebrate Christian von Koenigsegg's 50th birthday, the CC850 features the innovative Engage Shift System (ESS). This system can operate as a true 6-speed manual transmission with a clutch, or as an incredibly fast 9-speed automatic transmission.",
+                        image: "https://images.hgmsites.net/hug/koenigsegg-cc850_100852257_h.jpg"
+                    },
+                    {
+                        title: "A Timeless Homage",
+                        description: "Its design is a modern tribute to the CC8S, Koenigsegg's first production car. It retains the clean, elegant silhouette, iconic triple-stack tail lights, and a distinctive symmetrical interior, blending nostalgic charm with modern technology.",
+                        image: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2023-Koenigsegg-CC850-004-1080.jpg"
+                    }
+                ],
+                gallery: [
+                    'https://koenigsegg-cdn-g7eehhd6f0ewcaff.z02.azurefd.net/drupal/styles/430x265/azure/2022-08/Interior3%20copy.jpg?h=cfa408bc&itok=1nsN4h9G', // Exterior
+                    'https://backoffice.tda.co.id/media/media/article/2023/2/image-615-1024x678.apng', // Interior
+                    'https://static0.carbuzzimages.com/wordpress/wp-content/uploads/2025/01/474759064_18481424158053723_1337296710457777003_n-copy.jpg?q=49&fit=crop&w=360&h=240&dpr=2'  // Engine
+                ],
+                type: 'current',
+                longDescription: 'Created to celebrate Christian von Koenigsegg\'s 50th birthday and 20 years of CC8S production, the CC850 is a blend of art and engineering. The car features the innovative **Engage Shift System (ESS)**, which can operate as a true 6-speed manual transmission with a clutch, or as a 9-speed automatic. With a 1:1 power-to-weight ratio (1385 hp and 1385 kg), the CC850 offers a pure and satisfying driving experience.',
+            },
+            {
+                id: 'regera',
+                name: 'Regera',
+                title: 'THE HYBRID\nMASTERPIECE',
+                subtitle: 'A masterpiece of hybrid technology, the Regera combines a powerful twin-turbo V8 engine with three electric motors and the revolutionary Koenigsegg Direct Drive system, eliminating the traditional gearbox.',
+                image: 'https://cdn.motor1.com/images/mgl/pEOWW/s1/2019-koenigsegg-regera-front-view.webp',
+                specs: [{
+                    categoryTitle: "Performance",
+                    keySpecs: [
+                        { value: "1500", unit: "hp", label: "Combined Power" },
+                        { value: "31.49", unit: "s", label: "0-400-0 km/h" },
+                        { value: "410", unit: "km/h", label: "Top Speed" },
+                        { value: "KDD", unit: "", label: "Direct Drive" }
+                    ],
+                    categoryImage: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2016-Koenigsegg-Regera-005-1080.jpg",
+                }],
+                gallery: [
+                    'https://news.dupontregistry.com/wp-content/uploads/2025/02/Jeff-Regera-RM-58.jpg', // Exterior
+                    'https://koenigsegg-cdn-g7eehhd6f0ewcaff.z02.azurefd.net/drupal/styles/575x825/azure/2022-01/Interior.jpg?h=034efdb2&itok=AAsicgJN', // Interior
+                    'https://images.squarespace-cdn.com/content/v1/6371cc49cda4fd302dde5ccd/c8bee45a-9d7e-44d6-a789-6a75bd185446/2022-Koenigsegg-Regera_1297288.jpg'  // Engine
+                ],
+                type: 'legacy'
+            },
+            {
+                id: 'agerar',
+                name: 'Agera R',
+                title: 'THE POWER\nHOUSE',
+                subtitle: 'The Agera R pushed the boundaries of performance, featuring an in-house developed 5.0-liter twin-turbo V8 engine and becoming one of the first hypercars to widely use carbon fiber wheels.',
+                image: 'https://www.supervettura.com/blobs/Cars/203/642bda8c-750f-4603-a485-d61f4407f414.jpg?width=1920&height=1080&mode=crop',
+                specs: [{
+                    categoryTitle: "Performance",
+                    keySpecs: [
+                        { value: "1140", unit: "hp", label: "on E85" },
+                        { value: "440", unit: "km/h", label: "Top Speed" },
+                        { value: "21.19", unit: "s", label: "0-300-0 km/h" },
+                        { value: "Aircore", unit: "", label: "Carbon Wheels" }
+                    ],
+                    categoryImage: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2011-Koenigsegg-Agera-R-002-1080.jpg",
+                }],
+                gallery: [
+                    'https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2011-Koenigsegg-Agera-R-003-1080.jpg', // Exterior
+                    'https://static0.carbuzzimages.com/wordpress/wp-content/uploads/2024/08/koenigsegg-agera_r-2012-1280-bffb34943311cde5c3954764011f0edb5c.jpg?q=49&fit=contain&w=750&h=422&dpr=2', // Interior
+                    'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhTA7N1Z3gzFOSPYpX5huPjsC-jpze5PDHRepAxAV00ze47aZrAjis2rvzo2w2So0qVQIWOc2yOGO3m40E6F8beN2anoQLrWOn5S99mAEO4HGeBbWbIDDxgMku9zkF1A2vJjWnmnbPCqDQd/s1600/Koenigsegg+Agera+R+engine.jpg'  // Engine
+                ],
+                type: 'legacy'
+            },
+            {
+                id: 'ccx',
+                name: 'CCX',
+                title: 'THE ORIGINAL\nICON',
+                subtitle: 'The CCX was the first Koenigsegg to be truly global, designed to meet worldwide safety and emission regulations. It featured the iconic dihedral synchro-helix doors and a formidable supercharged V8.',
+                image: 'https://di-uploads-pod25.dealerinspire.com/koenigseggflorida/uploads/2020/12/CCXasset1-x1.jpg',
+                specs: [{
+                    categoryTitle: "Performance",
+                    keySpecs: [
+                        { value: "806", unit: "hp", label: "Power" },
+                        { value: "395", unit: "km/h", label: "Top Speed" },
+                        { value: "4.7L", unit: "V8", label: "Supercharged" },
+                        { value: "Iconic", unit: "", label: "Doors" }
+                    ],
+                    categoryImage: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2006-Koenigsegg-CCX-002-1080.jpg",
+                }],
+                gallery: [
+                    'https://di-uploads-pod25.dealerinspire.com/koenigseggflorida/uploads/2020/12/CCXasset3-x1.jpg', // Exterior
+                    'https://global.discourse-cdn.com/forza/optimized/4X/3/1/8/3185e74d06d42dff02d259532d06a68507b3cd09_2_1024x576.webp', // Interior
+                    'https://s.wsj.net/public/resources/images/BN-TX847_MYRIDE_M_20170619125611.jpg'  // Engine
+                ],
+                type: 'legacy'
+            },
+            {
+                id: 'one1',
+                name: 'One:1',
+                title: 'THE FIRST\nMEGACAR',
+                subtitle: 'Named for its breathtaking 1:1 power-to-weight ratio (1360 PS to 1360 kg), the One:1 was the world\'s first "Megacar", pushing the boundaries of track performance with advanced active aerodynamics.',
+                image: 'https://www.supercars.net/blog/wp-content/uploads/2016/01/Screenshot-2016-01-07-09.42.09-770x875.png',
+                specs: [{
+                    categoryTitle: "Performance",
+                    keySpecs: [
+                        { value: "1", unit: "MW", label: "Power Output" },
+                        { value: "1:1", unit: "", label: "Power-to-Weight" },
+                        { value: "440", unit: "km/h", label: "Top Speed" },
+                        { value: "610", unit: "kg", label: "Downforce" }
+                    ],
+                    categoryImage: "https://www.wsupercars.com/wallpapers-regular/Koenigsegg/2014-Koenigsegg-One-1-002-1080.jpg",
+                }],
+                gallery: [
+                    'https://www.topgear.com/sites/default/files/news-listicle/image/one1-1.jpg', // Exterior
+                    'https://www.supervettura.com/blobs/Cars/70/e32c88cc-b796-4aa2-9f34-799bea9c71f3.jpg?width=1920&height=1080&mode=crop', // Interior
+                    'https://www.supercars.net/blog/wp-content/uploads/2024/02/image-30-scaled-1.jpg'  // Engine
+                ],
+                type: 'legacy'
+            }
+        ];
+
+        let currentCarId = carData.find(c => c.type === 'current').id; 
+        let currentPage = 'home'; 
+        let currentDetailId = null; 
+        let lenis; 
+        let observer; 
+        let isScrolling = false; 
+
+
+        const homePage = document.getElementById('homePage');
+        const catalogPage = document.getElementById('catalogPage');
+        const detailPage = document.getElementById('detailPage'); 
+        const legacyPage = document.getElementById('legacyPage');
+        const carNav = document.getElementById('carNav');
+        const mainTitle = document.getElementById('mainTitle');
+        const mainDescription = document.getElementById('mainDescription'); 
+        const carImage = document.getElementById('carImage');
+        const spotlightBg = document.getElementById('spotlightBg');
+        const pageTitleElement = document.getElementById('pageTitle');
+        const menuOverlay = document.getElementById('menuOverlay');
+        const carSpecs = document.getElementById('carSpecs');
+        
+        const detailCarName = document.getElementById('detailCarName');
+        const detailImageBlock = document.getElementById('detailImageBlock');
+        const detailFeaturesContainer = document.getElementById('detailFeaturesContainer');
+        const detailSpecsSection = document.getElementById('detailSpecsSection');
+        const specNav = document.getElementById('specNav');
+        const specDetails = document.getElementById('specDetails');
+        const detailGallerySection = document.getElementById('detailGallerySection');
+        const detailGalleryGrid = document.getElementById('detailGalleryGrid');
+
+        function navigateTo(page, modelId = null) {
+            
+            const header = document.querySelector('.page-header');
+            let oldPage;
+            if (currentPage === 'home') oldPage = homePage;
+            else if (currentPage === 'catalog') oldPage = catalogPage;
+            else if (currentPage === 'detail') oldPage = detailPage;
+            else if (currentPage === 'legacy') oldPage = legacyPage;
+
+            header.style.opacity = '0'; 
+            if (oldPage) {
+                oldPage.style.opacity = '0'; 
+                oldPage.style.pointerEvents = 'none';
+                setTimeout(() => {
+                    oldPage.style.display = 'none'; 
+                    if (lenis) lenis.scrollTo(0, { immediate: true }); 
+                }, 600); 
+            }
+
+            currentPage = page;
+
+            setTimeout(() => {
+                let newPage;
+                if (currentPage === 'home' || currentPage === 'home-selector') {
+                    newPage = homePage;
+                    pageTitleElement.textContent = `Koenigsegg - ${carData.find(c => c.id === currentCarId)?.name || 'Home'}`;
+
+                    if (currentPage === 'home-selector') {
+                        lenis.scrollTo('#homeCarSelectorSection', { immediate: true });
+                        currentPage = 'home'; 
+                    }
+                }else if (currentPage === 'catalog') {
+                    newPage = catalogPage;
+                    pageTitleElement.textContent = 'Koenigsegg - Models';
+                    setTimeout(() => {
+                        document.getElementById('catalogHeroTitle').classList.add('is-visible');
+                    }, 200); 
+                    renderCatalog(modelId);
+                } else if (currentPage === 'detail') {
+                    newPage = detailPage;
+                    currentDetailId = modelId;
+                    renderDetail(currentDetailId);
+                    pageTitleElement.textContent = `Koenigsegg - ${carData.find(c => c.id === currentDetailId)?.name || 'Detail'}`;
+                } else if (currentPage === 'legacy') {
+                    newPage = legacyPage;
+                    pageTitleElement.textContent = 'Koenigsegg - Legacy';
+                    renderLegacyPage();
+                }
+
+                if (newPage) {
+                    newPage.style.display = 'block'; 
+                    void newPage.offsetWidth; 
+                    newPage.style.opacity = '1';
+                    newPage.style.pointerEvents = 'auto';
+                    if (currentPage === 'detail' || currentPage === 'catalog') {
+                        newPage.querySelectorAll('.scroll-animate').forEach(el => observer.observe(el));
+                    }
+                    header.style.opacity = '1'; // Fade in header
+                    // newPage.style.pointerEvents = 'auto'; // Not needed with display block/none
+                }
+
+            }, 600); 
+        }
+
+        function navigateAndScrollTo(page, anchor) {
+            navigateTo(page);
+            setTimeout(() => {
+                if (lenis) {
+                    lenis.scrollTo(anchor, { duration: 1.5 });
+                }
+            }, 700); 
+        }
+
+        function fadeOut(element) {
+            element.style.opacity = '0';
+        }
+
+        function fadeIn(element) {
+            requestAnimationFrame(() => {
+                element.style.opacity = '1';
+            });
+        }
+        
+        function renderCar(carId) {
+            const car = carData.find(c => c.id === carId);
+            if (!car || car.type !== 'current') return;
+
+            fadeOut(mainTitle);
+            fadeOut(carImage);
+            fadeOut(mainDescription.parentElement); 
+
+            setTimeout(() => {
+                mainTitle.textContent = car.title;
+                mainDescription.textContent = car.description; 
+                if (currentPage === 'home') {
+                    pageTitleElement.textContent = `Koenigsegg - ${car.name}`;
+                }
+                
+                carImage.src = car.image;
+
+                fadeIn(mainTitle);
+                fadeIn(carImage);
+                fadeIn(mainDescription.parentElement); 
+                
+                currentCarId = carId;
+
+            }, 750); 
+        }
+        
+        function renderDetail(carId) {
+            const car = carData.find(c => c.id === carId);
+            if (!car) return;
+
+            // 1. Set Title and Description
+            detailCarName.textContent = car.name.toUpperCase();
+
+            detailImageBlock.style.backgroundImage = `url(${car.image})`;
+
+            detailFeaturesContainer.innerHTML = '';
+            if (car.features && car.features.length > 0) { 
+                car.features.forEach((feature, index) => {
+                    const featureBlock = document.createElement('div');
+                    const layoutClass = index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse';
+                    featureBlock.className = `flex flex-col ${layoutClass} items-center gap-8 lg:gap-16 mb-24 scroll-animate`;
+    
+                    featureBlock.innerHTML = `
+                        <div class="w-full lg:w-1/2">
+                            <h3 class="text-3xl font-bold mb-4 text-orange-400 rajdhani">${feature.title.toUpperCase()}</h3>
+                            <p class="text-lg text-gray-300 leading-relaxed">${feature.description}</p>
+                        </div>
+                        <div class="w-full lg:w-1/2">
+                            <img src="${feature.image}" alt="${feature.title}" class="w-full h-auto rounded-lg shadow-xl">
+                        </div>
+                    `;
+                    detailFeaturesContainer.appendChild(featureBlock);
+                });
+            } else if (car.subtitle) { 
+                const descriptionBlock = document.createElement('div');
+                descriptionBlock.className = 'w-full max-w-4xl mx-auto text-center scroll-animate';
+                descriptionBlock.innerHTML = `
+                    <h3 class="text-3xl font-bold mb-4 text-orange-400 rajdhani">${car.title.replace('\n', ' ')}</h3>
+                    <p class="text-lg text-gray-300 leading-relaxed">${car.subtitle}</p>
+                `;
+                detailFeaturesContainer.appendChild(descriptionBlock);
+                setTimeout(() => descriptionBlock.classList.add('is-visible'), 100);
+            }
+
+            const specStatsGrid = document.getElementById('specStatsGrid');
+            specStatsGrid.innerHTML = '';
+
+            const specTitle = document.getElementById('specTitle');
+            const specContainer = detailSpecsSection;
+            if (car.specs && car.specs.length > 0) {
+                specContainer.classList.remove('hidden');
+
+                const keySpecCategory = car.specs.find(s => s.keySpecs);
+
+                if (keySpecCategory) {
+                    specTitle.textContent = `${car.name.toUpperCase()} SPECIFICATIONS`;
+                    specStatsGrid.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${keySpecCategory.categoryImage || car.image})`;
+
+                    keySpecCategory.keySpecs.forEach(stat => {
+                        const prefixHTML = stat.prefix ? `<span class="text-4xl">${stat.prefix}</span>` : '';
+                        const statCard = document.createElement('div');
+                        statCard.className = 'spec-stat-card';
+                        statCard.innerHTML = `
+                            <div class="spec-stat-value">
+                                ${prefixHTML}
+                                <span>${stat.value}</span>
+                                <span class="text-2xl">${stat.unit || ''}</span>
+                            </div>
+                            <div class="text-sm uppercase tracking-widest text-gray-400 mt-2">${stat.label}</div>
+                        `;
+                        specStatsGrid.appendChild(statCard);
+                    });
+                }
+            } else {
+                specContainer.classList.add('hidden');
+            }
+
+            detailGalleryGrid.innerHTML = '';
+            if (car.gallery && car.gallery.length > 0) {
+                detailGallerySection.classList.remove('hidden');
+                car.gallery.forEach(imgUrl => {
+                    const imgWrapper = document.createElement('div');
+                    imgWrapper.className = 'aspect-w-4 aspect-h-3 rounded-lg overflow-hidden scroll-animate';
+                    imgWrapper.innerHTML = `<img src="${imgUrl}" class="w-full h-full object-cover">`;
+                    detailGalleryGrid.appendChild(imgWrapper);
+                });
+            } else {
+                detailGallerySection.classList.add('hidden');
+            }
+        }
+
+        const createCard = (car) => {
+            const card = document.createElement('div');
+            if (car.type === 'current' || car.type === 'legacy') {
+                card.onclick = () => navigateTo('detail', car.id);
+            }
+
+            card.className = 'catalog-card scroll-animate'; 
+
+            card.innerHTML = `
+                <img src="${car.image}" alt="${car.name}" class="w-full h-full object-cover">
+                <div class="card-overlay">
+                    <h3 class="card-name">${car.name.toUpperCase()}</h3> 
+                    <span class="text-sm text-gray-300 font-light mt-4 max-w-md">${car.subtitle}</span>
+                </div>
+            `;
+            return card;
+        };
+
+        function renderCatalog(modelId = null) {
+            const currentGrid = document.getElementById('catalogCurrentGrid');
+            const legacyGrid = document.getElementById('catalogLegacyGrid');
+            currentGrid.innerHTML = '';
+            legacyGrid.innerHTML = '';
+            
+            let currentModelsToShow = [];
+            let legacyModelsToShow = [];
+
+            if (modelId) {
+                const car = carData.find(c => c.id === modelId && c.type === 'current');
+                if (car) {
+                    currentModelsToShow = [car];
+                } 
+            } else {
+                currentModelsToShow = carData.filter(c => c.type === 'current' && c.showInCatalog !== false);
+            }
+
+            currentModelsToShow.forEach(car => {
+                const cardElement = createCard(car);
+                currentGrid.appendChild(cardElement);
+            }); 
+
+            const legacyModels = carData.filter(c => c.type === 'legacy');
+            legacyModels.forEach(car => {
+                const cardElement = createCard(car);
+                legacyGrid.appendChild(cardElement);
+            });
+        }
+
+        function renderLegacyPage() {
+            const legacyNav = document.getElementById('legacyNav');
+            const legacyContent = document.getElementById('legacyContent');
+            legacyNav.innerHTML = '';
+            legacyContent.innerHTML = '';
+
+            const legacyModelsToShow = carData.filter(c => c.type === 'legacy');
+            
+            legacyModelsToShow.forEach(car => {
+                const navItem = document.createElement('button');
+                navItem.className = 'spec-nav-item text-left'; // Re-use spec nav styling
+                navItem.textContent = car.name;
+                navItem.onclick = () => {
+                    legacyContent.innerHTML = `
+                        <div class="scroll-animate is-visible">
+                            <img src="${car.image}" alt="${car.name}" class="w-full h-auto rounded-lg shadow-xl mb-8">
+                            <h3 class="text-3xl font-bold mb-4 text-orange-400 rajdhani">${car.title.replace('\n', ' ')}</h3>
+                            <p class="text-lg text-gray-300 leading-relaxed">${car.subtitle}</p>
+                        </div>
+                    `;
+                    legacyNav.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                    navItem.classList.add('active');
+                };
+                legacyNav.appendChild(navItem);
+            });
+
+            if (legacyNav.firstChild) {
+                legacyNav.firstChild.click();
+            }
+        }
+
+        function init() {
+            carData.filter(c => c.type === 'current' && c.showInCatalog !== false).forEach(car => {
+                const item = document.createElement('span');
+                item.className = 'nav-item';
+                item.textContent = car.name;
+                item.dataset.carId = car.id;
+                item.addEventListener('click', (e) => {
+                    const initialPrompt = document.getElementById('selectorInitialPrompt');
+                    const discoverButton = document.getElementById('selectorDiscoverButton');
+                    const selectedCar = carData.find(c => c.id === car.id);
+                    const selectorBg = document.getElementById('selectorBgImage');
+                    const carNavItems = document.querySelectorAll('#carNav .nav-item');
+
+                    initialPrompt.style.opacity = '0';
+                    discoverButton.style.opacity = '0';
+
+                    selectorBg.style.opacity = '0'; 
+
+                    setTimeout(() => {
+                        initialPrompt.textContent = selectedCar.title; 
+                        discoverButton.onclick = () => {
+                            navigateTo('detail', selectedCar.id);
+                        };
+
+                        setTimeout(() => {
+                            initialPrompt.style.opacity = '1';
+                            discoverButton.style.opacity = '1';
+                        }, 50);
+
+                        selectorBg.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${selectedCar.image})`;
+                        selectorBg.style.opacity = '1';
+                    }, 400); 
+
+                    carNavItems.forEach(navItem => {
+                        navItem.classList.remove('active'); 
+                    });
+                    e.currentTarget.classList.add('active'); 
+                });
+                carNav.appendChild(item);
+            });
+
+            document.querySelector('#carNav .nav-item').click();
+
+            renderCar(currentCarId);
+            
+            catalogPage.style.display = 'none';
+            catalogPage.style.opacity = '0'; 
+            catalogPage.style.pointerEvents = 'none';
+            detailPage.style.display = 'none';
+            detailPage.style.opacity = '0';
+            detailPage.style.pointerEvents = 'none';
+            legacyPage.style.display = 'none';
+            legacyPage.style.opacity = '0';
+            legacyPage.style.pointerEvents = 'none';
+
+            lenis = new Lenis();
+
+            function raf(time) {
+                lenis.raf(time);
+                requestAnimationFrame(raf);
+            }
+
+            requestAnimationFrame(raf);
+
+            let lastScrollTop = 0;
+            const header = document.querySelector('.page-header');
+            const headerHeight = header.offsetHeight;
+
+            lenis.on('scroll', (e) => {
+            });
+            observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible'); 
+                    } else {
+                        entry.target.classList.remove('is-visible'); 
+                    }
+                });
+            }, {
+                threshold: 0.1 
+            });
+
+            const animatedElements = document.querySelectorAll('.scroll-animate');
+            animatedElements.forEach(el => observer.observe(el));
+        }
+
+        window.onload = init;
+    </script>
+    
+</body>
+</html>
